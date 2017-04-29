@@ -18,7 +18,7 @@ type Worker interface {
 	Abandon()
 }
 
-// Worker represents a goroutine that handles abstract, structured tasks. Workers can be pooled and managed via
+// worker represents a goroutine that handles abstract, structured tasks. Workers can be pooled and managed via
 // WorkerPool.
 type worker struct {
 	noCopy noCopy
@@ -44,10 +44,11 @@ func StartNewWorker(tasks chan interface{}, onTask func(interface{}), waitGroup 
 
 /**
  * Design notes: having a signaling channel for quits and using a select, rather than doing a 'for range' on just the
- * tasks channel, allows for a few things:
- *  - A portion of workers can be gracefully removed (via Abandon) in designs that use a single channel spread across multiple workers, while the remaining workers continue to process the tasks in the channel.
- *  - Closing the channel acts as a drain (the workers will run until they have consumed all the tasks).
- *  - Work that has been buffered onto the channel can be abandoned by calling Abandon() on each worker.
+ * tasks channel, allows for:
+ *  - A portion of workers can be gracefully removed (via Abandon) in designs that use a single channel spread across
+ *	  multiple workers, while the remaining workers continue to process the tasks in the channel.
+ *  - Closing the channel acts as a drain (the workers will run until they have consumed all the tasks), and the drain
+ *	  can be interrupted by Abandon().
  */
 func (w *worker) start() {
 
