@@ -1,7 +1,7 @@
 package crypto_test
 
 import (
-	"github.com/bit-mancer/go-util/util/crypto"
+	"github.com/bit-mancer/go-util/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
