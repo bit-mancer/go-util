@@ -1,13 +1,19 @@
-hash: 12a68abf6846b89ef617315b81f9c854441ac354aead5d03fdd3870a19c1ec8a
-updated: 2017-04-29T00:46:41.508803155-07:00
+hash: 228f519a87db4f9c2c9f87a38c84414d0220dc68eecd0a0ebcc2e1db17eab4e6
+updated: 2017-04-29T23:14:27.62465609-07:00
 imports:
 - name: github.com/gtank/cryptopasta
   version: bc3a108a5776376aa811eea34b93383837994340
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/crypto
   version: c7af5bf2638a1164f2eb5467c39c6cffbd13a02e
   subpackages:
   - bcrypt
   - blowfish
+- name: golang.org/x/sys
+  version: 9ccfe848b9db8435a24c424abbc07a921adf1df5
+  subpackages:
+  - unix
 testImports:
 - name: github.com/onsi/ginkgo
   version: 77a8c1e5c40d6bb6c5eb4dd4bdce9763564f6298
@@ -47,9 +53,5 @@ testImports:
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
-- name: golang.org/x/sys
-  version: 9ccfe848b9db8435a24c424abbc07a921adf1df5
-  subpackages:
-  - unix
 - name: gopkg.in/yaml.v2
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
