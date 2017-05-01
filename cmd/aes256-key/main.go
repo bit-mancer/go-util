@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bit-mancer/go-util/util/crypto"
+	"github.com/bit-mancer/go-util/crypto"
 )
 
 func main() {

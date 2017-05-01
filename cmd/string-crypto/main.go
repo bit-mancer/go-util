@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bit-mancer/go-util/util/crypto"
+	"github.com/bit-mancer/go-util/crypto"
 )
 
 var (
