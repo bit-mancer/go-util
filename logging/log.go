@@ -21,6 +21,9 @@ const HostKey = "_host"
 // AuditKey is the map key used for audit-related entries (see Audit).
 const AuditKey = "_audit"
 
+// ErrorKey is the map key used for error entries (see WithError).
+const ErrorKey = "_error"
+
 // Fields is a set of strutured log information (i.e. a map-compatible type).
 // Example: log.WithFields(logging.Fields{"myKey": myVal, "myOtherKey": myOtherVal})
 type Fields logrus.Fields
@@ -83,7 +86,7 @@ func (l *logger) WithFields(fields Fields) *logger {
 
 // WithError logs the provided error as a structured log entry, and returns the entry for further use.
 func (l *logger) WithError(err error) *logger {
-	e := (*logrus.Entry)(l).WithError(err)
+	e := (*logrus.Entry)(l).WithField(ErrorKey, err)
 	return (*logger)(e)
 }
 
