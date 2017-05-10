@@ -28,6 +28,25 @@ const ErrorKey = "_error"
 // Example: log.WithFields(logging.Fields{"myKey": myVal, "myOtherKey": myOtherVal})
 type Fields logrus.Fields
 
+// Formatter is implemented by log formatters.
+type Formatter logrus.Formatter
+
+var (
+	// TextFormatter is a text log formatter.
+	TextFormatter Formatter
+
+	// GKEFormatter is a Google Container Engine (Stackdriver via fluentd) log formatter.
+	GKEFormatter Formatter
+)
+
+func init() {
+	tf := &logrus.TextFormatter{}
+	tf.FullTimestamp = true
+	TextFormatter = &utcFormatter{tf}
+
+	GKEFormatter = &gkeFormatter{}
+}
+
 // Logger is implemented by structured loggers.
 type Logger interface {
 	WithField(key string, value interface{}) *logger
@@ -46,16 +65,13 @@ type Logger interface {
 type logger logrus.Entry
 
 // NewLog returns a new Logger instance.
+//  * 'formatter' is the formatter to use for the log output (i.e. either TextFormatter, or GKEFormatter).
 // 	* 'source' is the optional source of the events (the root that all logs under this logger and its domains will
 //    be tagged with).
-func NewLog(source string) Logger {
-	baseFormatter := &logrus.TextFormatter{}
-	baseFormatter.FullTimestamp = true
-
-	utcFormatter := &utcFormatter{baseFormatter}
+func NewLog(formatter Formatter, source string) Logger {
 
 	l := logrus.New()
-	l.Formatter = utcFormatter
+	l.Formatter = formatter
 	l.Out = os.Stdout
 	l.Level = logrus.DebugLevel
 
