@@ -21,7 +21,7 @@ type Worker interface {
 // worker represents a goroutine that handles abstract, structured tasks. Workers can be pooled and managed via
 // WorkerPool.
 type worker struct {
-	noCopy noCopy
+	noCopy NoCopy
 
 	tasks     chan interface{}
 	onTask    func(interface{})
@@ -90,8 +90,3 @@ func (w *worker) Abandon() {
 		w.abandon <- Signal{}
 	}()
 }
-
-// Prevent structs that have an instance of noCopy from being copied (no-copy check via vet -copylocks checker)
-type noCopy struct{}
-
-func (*noCopy) Lock() {}
