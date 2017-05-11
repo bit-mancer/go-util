@@ -50,6 +50,9 @@ type Logger interface {
 	// NewDomainLogger returns a new Logger instance, based on the current instance, with the provided domain.
 	// The domain is set via With() using a well-defined key.
 	NewDomainLogger(domain string) Logger
+
+	// Flush tries to commit any buffered log messages.
+	Flush()
 }
 
 type logger zap.Logger
@@ -105,4 +108,10 @@ func (l *logger) ErrorWithTrace(err error, msg string, fields ...zapcore.Field) 
 func (l *logger) NewDomainLogger(domain string) Logger {
 	newLogger := (*zap.Logger)(l).With(zap.String(DomainKey, domain))
 	return (*logger)(newLogger)
+}
+
+func (l *logger) Flush() {
+	if err := (*zap.Logger)(l).Sync(); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to flush logger: %v", err)
+	}
 }
