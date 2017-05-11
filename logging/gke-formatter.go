@@ -30,7 +30,7 @@ func (f *gkeFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		msg.Meta = entry.Data
 	}
 
-	data, err := ffjson.MarshalFast(msg)
+	data, err := ffjson.Marshal(msg)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to marshal GKE log message: %v", err)
 	}
