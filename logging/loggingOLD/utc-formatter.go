@@ -1,4 +1,4 @@
-package logging
+package loggingOLD
 
 import (
 	"github.com/Sirupsen/logrus"

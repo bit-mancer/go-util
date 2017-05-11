@@ -3,7 +3,7 @@
 // source: gke-message.go
 // DO NOT EDIT!
 
-package logging
+package loggingOLD
 
 import (
 	"bytes"

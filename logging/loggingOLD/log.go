@@ -1,7 +1,7 @@
 /*
 Package logging contains a simple wrapper around a concrete structured logger.
 */
-package logging
+package loggingOLD
 
 import (
 	"os"
