@@ -67,14 +67,16 @@ func NewLog(productionLogging bool, source string) (Logger, error) {
 	var log *zap.Logger
 	var err error
 
+	options := []zap.Option{zap.AddCallerSkip(1)}
+
 	if productionLogging {
-		log, err = zap.NewProduction()
+		log, err = zap.NewProduction(options...)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create production logger: %v\n", err)
 			os.Exit(1)
 		}
 	} else {
-		log, err = zap.NewDevelopment()
+		log, err = zap.NewDevelopment(options...)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create development logger: %v\n", err)
 			os.Exit(1)
