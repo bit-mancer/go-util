@@ -62,7 +62,8 @@ type logger zap.Logger
 // 'productionLogging' is false, a developent-oriented console logger is constructed which logs at the Debug level.
 // 'source' is the optional source (e.g. application or service name) of the events; all logs under this logger and
 // its domains will be tagged with the source, if one is provided.
-func NewLog(productionLogging bool, source string) (Logger, error) {
+// 'fields' is an optional set of fields to install in the logger instance.
+func NewLog(productionLogging bool, source string, fields ...zapcore.Field) (Logger, error) {
 
 	var log *zap.Logger
 	var err error
@@ -84,14 +85,14 @@ func NewLog(productionLogging bool, source string) (Logger, error) {
 	}
 
 	if source != "" {
-		log = log.With(zap.String(SourceKey, source))
+		fields = append(fields, zap.String(SourceKey, source))
 	}
 
 	if hostname, err := os.Hostname(); err == nil {
-		log = log.With(zap.String(HostKey, hostname))
+		fields = append(fields, zap.String(HostKey, hostname))
 	}
 
-	return (*logger)(log), nil
+	return (*logger)(log.With(fields...)), nil
 }
 
 func (l *logger) Debug(msg string, fields ...zapcore.Field) {
