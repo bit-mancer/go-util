@@ -33,10 +33,22 @@ func (f FieldSet) Append(fields ...zapcore.Field) FieldSet {
 
 // Logger is implemented by... loggers.
 type Logger interface {
+
+	// Debug logs development-related information that is not typically necessary for production. When choosing a
+	// logging level, you should assume that debug logging will be disabled in production environments.
 	Debug(msg string, fields ...zapcore.Field)
+
+	// Info logs at a level suitable for production; the log should be *actionable information* that will be read by
+	// a human, or by a machine.
 	Info(msg string, fields ...zapcore.Field)
+
+	// ErrorWithTrace logs an error and captures the current stack trace (at the cost of a small performance hit).
+	// ErrorWithTrace is appropriate for unexpected errors, where the stack trace will be useful in diagnosing the
+	// root cause. For expected / non-critical errors, you may wish to prefer Info with a zap.Error() field.
 	ErrorWithTrace(err error, msg string, fields ...zapcore.Field)
 
+	// NewDomainLogger returns a new Logger instance, based on the current instance, with the provided domain.
+	// The domain is set via With() using a well-defined key.
 	NewDomainLogger(domain string) Logger
 }
 
