@@ -8,29 +8,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// SourceKey is the map key used for logging sources (see NewLog).
-const SourceKey = "_source"
-
-// DomainKey is the map key used for logging domains (see NewDomainLogger).
-const DomainKey = "_domain"
-
-// HostKey is the map key used for logging the machine hostname (via os.Hostname).
-const HostKey = "_host"
-
-// FieldSet is an alias for a slice of zapcore Fields. Functions that aggregate fields can return a FieldSet to allow
-// further aggregation.
-type FieldSet []zapcore.Field
-
-// AppendFieldSet appends a FieldSet to the current FieldSet.
-func (f FieldSet) AppendFieldSet(fields FieldSet) FieldSet {
-	return append([]zapcore.Field(f), fields...)
-}
-
-// Append appends fields to the current FieldSet.
-func (f FieldSet) Append(fields ...zapcore.Field) FieldSet {
-	return append([]zapcore.Field(f), fields...)
-}
-
 // Logger is implemented by... loggers.
 type Logger interface {
 
@@ -71,13 +48,13 @@ func NewLog(productionLogging bool, source string, fields ...zapcore.Field) (Log
 	options := []zap.Option{zap.AddCallerSkip(1)}
 
 	if productionLogging {
-		log, err = zap.NewProduction(options...)
+		log, err = newProductionConfig().Build(options...)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create production logger: %v\n", err)
 			os.Exit(1)
 		}
 	} else {
-		log, err = zap.NewDevelopment(options...)
+		log, err = newDevelopmentConfig().Build(options...)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create development logger: %v\n", err)
 			os.Exit(1)
@@ -109,7 +86,7 @@ func (l *logger) ErrorWithTrace(err error, msg string, fields ...zapcore.Field) 
 }
 
 func (l *logger) NewDomainLogger(domain string) Logger {
-	newLogger := (*zap.Logger)(l).With(zap.String(DomainKey, domain))
+	newLogger := (*zap.Logger)(l).Named(domain)
 	return (*logger)(newLogger)
 }
 
