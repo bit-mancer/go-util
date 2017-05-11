@@ -8,10 +8,3 @@ const DomainKey = "_domain"
 
 // HostKey is the map key used for logging the machine hostname (via os.Hostname).
 const HostKey = "_host"
-
-const timeKey = "timestamp"
-const levelKey = "severity"
-const nameKey = DomainKey
-const callerKey = "reportLocation"
-const messageKey = "message"
-const stacktraceKey = "stacktrace"
