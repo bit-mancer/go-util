@@ -12,16 +12,16 @@ type Worker interface {
 	// stopped.
 	//
 	// Note that on average, the worker will complete one further task before actually stopping.
-	// Abandon is not typically called to stop workers; instead, simply close the task channel (which acts as a drain
-	// -- no further tasks will be queued, any any tasks left in the channel will be processed, then the worker(s) will
-	// exit).
+	// Abandon is not typically called to stop workers; instead, simply close the task channel (which acts as a
+	// drain -- no further tasks will be queued, any tasks left in the channel will be processed, then the worker(s)
+	// will exit).
 	Abandon()
 }
 
 // worker represents a goroutine that handles abstract, structured tasks. Workers can be pooled and managed via
 // WorkerPool.
 type worker struct {
-	noCopy NoCopy
+	_ NoCopy // trigger go vet on copy
 
 	tasks     chan interface{}
 	onTask    func(interface{})
@@ -44,7 +44,7 @@ func StartNewWorker(tasks chan interface{}, onTask func(interface{}), waitGroup 
 
 /**
  * Design notes: having a signaling channel for quits and using a select, rather than doing a 'for range' on just the
- * tasks channel, allows for:
+ * tasks channel, allows for the following:
  *  - A portion of workers can be gracefully removed (via Abandon) in designs that use a single channel spread across
  *	  multiple workers, while the remaining workers continue to process the tasks in the channel.
  *  - Closing the channel acts as a drain (the workers will run until they have consumed all the tasks), and the drain
@@ -79,12 +79,14 @@ func (w *worker) start() {
 	}()
 }
 
-// Abandon instructs the worker goroutine to stop in the near future, possibly abandoning any remaining items in the
-// worker task channel. Abandon is non-blocking and will immediately return, likely before the goroutine has stopped.
+// Abandon instructs the worker goroutine to stop in the near future, possibly abandoning any remaining items in
+// the worker task channel. Abandon is non-blocking and will immediately return, likely before the goroutine has
+// stopped.
 //
 // Note that on average, the worker will complete one further task before actually stopping.
-// Abandon is not typically called to stop workers; instead, simply close the task channel (which acts as a drain --
-// no further tasks will be queued, any any tasks left in the channel will be processed, then the worker(s) will exit).
+// Abandon is not typically called to stop workers; instead, simply close the task channel (which acts as a
+// drain -- no further tasks will be queued, any tasks left in the channel will be processed, then the worker(s)
+// will exit).
 func (w *worker) Abandon() {
 	go func() {
 		w.abandon <- Signal{}

@@ -5,5 +5,8 @@
 # Git
 *.orig
 
+# VSCode
+.vscode/
+
 # Vendored dependencies
 /vendor/
