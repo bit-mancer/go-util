@@ -35,4 +35,4 @@ Please don't hesitate to reach out if you have questions or need assistance with
 
 
 [conduct-url]: CODE_OF_CONDUCT.md
-[license-url]: LICENSE.md
+[license-url]: LICENSE.txt

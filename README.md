@@ -9,7 +9,7 @@ Sundry golang utility stuff.
 
 
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
-[license-url]: LICENSE.md
+[license-url]: LICENSE.txt
 
 [contributing-image]: https://img.shields.io/badge/contributing-CoC-blue.svg
 [contributing-url]: CONTRIBUTING.md
