@@ -23,7 +23,7 @@ var _ = Describe("EncryptStringToBase64", func() {
 		Expect(ciphertext).NotTo(Equal(""))
 		Expect(err).To(BeNil())
 
-		// this is a bit blackbox-ish because we express the padding used (standard), but oh well...
+		// this is a bit whitebox-ish because we express the padding used (standard)
 		_, err = base64.StdEncoding.DecodeString(ciphertext)
 		Expect(err).To(BeNil())
 	})

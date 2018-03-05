@@ -11,8 +11,8 @@ import (
 var _ = Describe("AES256Key", func() {
 	// More of a static assertion, but eh:
 	It("is assignable to a [32]byte (as required by crypto functions)", func() {
-		var _ [32]byte
-		_ = crypto.AES256Key{}
+		var v [32]byte = crypto.AES256Key{}
+		v[0] = 0 // prevent unused error
 	})
 
 	It("has a factory function that creates a new, random key", func() {
