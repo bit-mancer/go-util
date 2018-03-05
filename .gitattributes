@@ -1,0 +1,2 @@
+# Tell GitHub's Linguist that these files are generated (collapsed by default during diffs)
+**/zz_generated.*.go linguist-generated=true

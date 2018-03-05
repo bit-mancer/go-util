@@ -13,6 +13,7 @@ import (
 )
 
 const toolName string = "slices-gen"
+const generatedFilePrefix string = "zz_generated." + toolName // see .gitattributes
 
 type record struct {
 	ToolName      string
@@ -83,7 +84,7 @@ func generateFile(generator *template.Template, rec *record, filename string) er
 	// On some platforms, os.Rename may fail if the system temp directory and the destination are on different
 	// volumes, so instead we'll use a temporary file in the current directory
 
-	tempFile, err := ioutil.TempFile(".", toolName) // create in the current directory
+	tempFile, err := ioutil.TempFile(".", "temp-"+toolName) // create in the current directory
 	if err != nil {
 		return fmt.Errorf("failed to create a temporary file: %v", err)
 	}
@@ -121,12 +122,12 @@ func main() {
 		SliceType:     sliceType,
 	}
 
-	if err := generateFile(codeGenerator, rec, fmt.Sprintf("%s_%s.go", toolName, theType)); err != nil {
+	if err := generateFile(codeGenerator, rec, fmt.Sprintf("%s_%s.go", generatedFilePrefix, theType)); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: failed to generate a file: %v\n", toolName, err)
 		os.Exit(1)
 	}
 
-	if err := generateFile(testGenerator, rec, fmt.Sprintf("%s_%s_test.go", toolName, theType)); err != nil {
+	if err := generateFile(testGenerator, rec, fmt.Sprintf("%s_%s_test.go", generatedFilePrefix, theType)); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: failed to generate a file: %v\n", toolName, err)
 		os.Exit(1)
 	}
