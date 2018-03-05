@@ -1,14 +1,16 @@
 package util
 
-// Int64InSlice determines if a value is present in the provided slice.
-// Runtime: O(n) -- appropriate for small-n slices
-func Int64InSlice(value int64, slice []int64) bool {
+// Run 'go generate ./...' to build the various slice utilities
 
-	for i, length := 0, len(slice); i < length; i++ {
-		if slice[i] == value {
-			return true
-		}
-	}
-
-	return false
-}
+//go:generate go run slices-gen.go int
+//go:generate go run slices-gen.go uint
+//go:generate go run slices-gen.go int8
+//go:generate go run slices-gen.go int16
+//go:generate go run slices-gen.go int32
+//go:generate go run slices-gen.go int64
+//go:generate go run slices-gen.go uint8
+//go:generate go run slices-gen.go uint16
+//go:generate go run slices-gen.go uint32
+//go:generate go run slices-gen.go uint64
+//go:generate go run slices-gen.go byte
+//go:generate go run slices-gen.go rune
