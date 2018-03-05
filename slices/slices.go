@@ -1,4 +1,4 @@
-package util
+package slices
 
 // Run 'go generate ./...' to build the various slice utilities
 

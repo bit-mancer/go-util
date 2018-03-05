@@ -1,4 +1,4 @@
-package util_test
+package slices_test
 
 import (
 	. "github.com/onsi/ginkgo"
