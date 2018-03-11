@@ -19,5 +19,8 @@ No external dependencies (other than for unit tests, which use ginkgo and gomega
 [travis-image]: https://travis-ci.org/bit-mancer/go-util.svg?branch=master
 [travis-url]: https://travis-ci.org/bit-mancer/go-util
 
+[coveralls-image]: https://coveralls.io/repos/github/bit-mancer/go-util/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/bit-mancer/go-util?branch=master
+
 [goreportcard-image]: https://goreportcard.com/badge/github.com/bit-mancer/go-util
 [goreportcard-url]: https://goreportcard.com/report/github.com/bit-mancer/go-util

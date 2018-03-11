@@ -11,3 +11,9 @@ matrix:
     allow_failures:
         - go: "master" # allow master to fail
     fast_finish: true # determine build result as soon as the required jobs finish
+
+before_install:
+    - go get github.com/mattn/goveralls
+
+script:
+    - $GOPATH/bin/goveralls -service=travis-ci
