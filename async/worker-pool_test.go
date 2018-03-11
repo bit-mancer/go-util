@@ -1,9 +1,9 @@
-package util_test
+package async_test
 
 import (
 	"sync/atomic"
 
-	. "github.com/bit-mancer/go-util/util"
+	. "github.com/bit-mancer/go-util/async"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

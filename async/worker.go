@@ -1,17 +1,19 @@
-package util
+package async
 
 import (
 	"sync"
+
+	"github.com/bit-mancer/go-util/util"
 )
 
 // Worker represents a goroutine that handles abstract, structured tasks. Workers can be pooled and managed via WorkerPool.
 type Worker struct {
-	_ NoCopy // trigger go vet on copy
+	_ util.NoCopy // trigger go vet on copy
 
 	tasks     chan interface{}
 	onTask    func(interface{})
 	waitGroup *sync.WaitGroup
-	abandon   chan Signal
+	abandon   chan util.Signal
 }
 
 // NewWorker creates, starts, and returns a new Worker.
@@ -21,7 +23,7 @@ func NewWorker(tasks chan interface{}, onTask func(interface{}), waitGroup *sync
 		tasks:     tasks,
 		onTask:    onTask,
 		waitGroup: waitGroup,
-		abandon:   make(chan Signal)}
+		abandon:   make(chan util.Signal)}
 
 	start(w)
 	return w
@@ -73,6 +75,6 @@ func start(w *Worker) {
 // will exit).
 func (w *Worker) Abandon() {
 	go func() {
-		w.abandon <- Signal{}
+		w.abandon <- util.Signal{}
 	}()
 }

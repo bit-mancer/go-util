@@ -1,3 +1,4 @@
+// Package util contains tiny utility components.
 package util
 
 // Signal is a sentinel value that indicates an explicit lack of information.

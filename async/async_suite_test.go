@@ -1,4 +1,4 @@
-package util_test
+package async_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestUtil(t *testing.T) {
+func TestAsync(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Util Suite")
+	RunSpecs(t, "Async Suite")
 }
