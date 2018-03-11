@@ -3,6 +3,7 @@
 [![License][license-image]][license-url]
 [![Contributor Code of Conduct][contributing-image]][contributing-url]
 [![Build Status][travis-image]][travis-url]
+[![Coverage Status][coveralls-image]][coveralls-url]
 [![Go Report Card][goreportcard-image]][goreportcard-url]
 
 Sundry golang utility stuff.
