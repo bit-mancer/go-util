@@ -75,7 +75,7 @@ func (p *workerPool) Remove(count int) error {
 	length := len(p.workers)
 
 	if count > length {
-		return fmt.Errorf("Tried to remove more workers (%d) than were available in pool (%d).", count, length)
+		return fmt.Errorf("tried to remove more workers (%d) than were available in pool (%d)", count, length)
 	}
 
 	firstIndexToRemove := length - count
