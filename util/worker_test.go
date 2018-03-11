@@ -22,7 +22,7 @@ var _ = Describe("Worker", func() {
 			atomic.AddUint32(&callCount, 1)
 		}
 
-		StartNewWorker(tasks, onTask, nil)
+		NewWorker(tasks, onTask, nil)
 		tasks <- 1
 
 		Eventually(func() uint32 {
@@ -42,7 +42,7 @@ var _ = Describe("Worker", func() {
 
 		wg := sync.WaitGroup{}
 
-		StartNewWorker(tasks, onTask, &wg)
+		NewWorker(tasks, onTask, &wg)
 		tasks <- 1
 		<-signal     // wait for worker to pick up the task
 		close(tasks) // close the channel, signaling worker to exit
@@ -62,7 +62,7 @@ var _ = Describe("Worker", func() {
 
 		wg := sync.WaitGroup{}
 
-		worker := StartNewWorker(tasks, onTask, &wg)
+		worker := NewWorker(tasks, onTask, &wg)
 		worker.Abandon()
 		wg.Wait()
 

@@ -14,7 +14,7 @@ var _ = Describe("WorkerPool", func() {
 	var callCount *uint32
 	var tasks chan interface{}
 	var onTask func(interface{})
-	var pool WorkerPooler
+	var pool *WorkerPool
 
 	BeforeEach(func() {
 		count := uint32(0)
