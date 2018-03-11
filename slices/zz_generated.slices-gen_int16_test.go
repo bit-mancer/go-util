@@ -14,7 +14,7 @@ var _ = Describe("Int16Slice", func() {
 		s[0] = 0 // prevent unused error
 	})
 
-	_ = Describe(".Contains", func() {
+	_ = Describe("Contains", func() {
 		It("returns true if the provided value is in the slice", func() {
 			s := Int16Slice{1, 2, 3, 4, 5}
 			Expect(s.Contains(4)).To(BeTrue())

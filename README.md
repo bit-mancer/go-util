@@ -7,6 +7,8 @@
 
 Sundry golang utility stuff.
 
+No external dependencies (other than for unit tests, which use ginkgo and gomega).
+
 
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE.txt
