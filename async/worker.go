@@ -14,7 +14,7 @@ type Worker struct {
 	tasks      chan interface{}
 	handleTask func(interface{})
 	waitGroup  *sync.WaitGroup
-	abandon    chan util.Signal
+	abandon    chan Signal
 }
 
 // NewWorker creates, starts, and returns a new Worker. The worker will accept items from the 'tasks' channel and run
@@ -37,7 +37,7 @@ func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *
 		tasks:      tasks,
 		handleTask: handleTask,
 		waitGroup:  waitGroup,
-		abandon:    make(chan util.Signal)}
+		abandon:    make(chan Signal)}
 
 	start(w)
 	return w, nil
@@ -89,6 +89,6 @@ func start(w *Worker) {
 // will exit).
 func (w *Worker) Abandon() {
 	go func() {
-		w.abandon <- util.Signal{}
+		w.abandon <- Signal{}
 	}()
 }
