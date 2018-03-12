@@ -27,22 +27,47 @@ const RequiredTagValue = "required"
 //			MyStringValue string `config:"required"` // must not equal ""
 //		}
 func ValidateConstraints(config interface{}) error {
-	return validateStruct("config", config)
+	return validateStruct("", config)
 }
 
-// (note that this function is non-exhaustive, e.g. arrays and structs aren't supported; see validateStruct
 func isZeroValue(valueType reflect.Type, value reflect.Value) bool {
+
+	if !value.IsValid() { // zero Value type -- nil in caller passed to reflect.TypeOf/reflect.ValueOf that was then passed to us
+		return true
+	}
 
 	typeKind := valueType.Kind()
 
 	switch typeKind {
+	// re: including reflect.Ptr in this list: we want to check if the ptr is nil, NOT whether the thing it points to,
+	// if anything, is a zero-value
 	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice, reflect.UnsafePointer:
 		return value.IsNil()
 
-	// These types need special handling, and we've already covered them below in validateStruct (i.e. they shouldn't be passed to this function)
-	// FIXME implement handling to get rid of the panic if for no other (current) reason?
-	case reflect.Array, reflect.Struct:
-		panic(fmt.Sprintf("shouldn't have received kind of %v: unsupported type", typeKind))
+	case reflect.Array:
+		for i := 0; i < value.Len(); i++ {
+			elementValue := value.Index(i)
+			if !isZeroValue(elementValue.Type(), elementValue) {
+				return false
+			}
+		}
+		return true
+
+	case reflect.Struct:
+		for i := 0; i < value.NumField(); i++ {
+			fieldValue := value.Field(i)
+
+			// skip unexported fields -- go panics if we try to return a value obtained from an unexported field (via
+			// Interface(); if we pass an unexported field to isZeroValue and it is a default type that hits the
+			// Interface() call at the end of this method, then we experience the panic).
+			if fieldValue.CanInterface() {
+				if !isZeroValue(fieldValue.Type(), fieldValue) {
+					return false
+				}
+			}
+		}
+		return true
+
 	}
 
 	return value.Interface() == reflect.Zero(valueType).Interface()

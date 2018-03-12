@@ -8,6 +8,7 @@ import (
 )
 
 var _ = Describe("config", func() {
+
 	_ = Describe("ValidateConstraints", func() {
 		It("returns an error if passed a nil value", func() {
 			Expect(ValidateConstraints(nil)).To(HaveOccurred())
