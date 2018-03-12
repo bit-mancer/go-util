@@ -13,7 +13,11 @@ matrix:
     fast_finish: true # determine build result as soon as the required jobs finish
 
 before_install:
-    - go get github.com/mattn/goveralls
+    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh # install dep (https://golang.github.io/dep/docs/installation.html)
+
+install:
+    - dep ensure -add github.com/mattn/goveralls@v0.0.2 # install dependencies + goveralls
+    - go install ./vendor/github.com/mattn/goveralls # build goveralls
 
 script:
     - $GOPATH/bin/goveralls -service=travis-ci
