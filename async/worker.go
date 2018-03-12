@@ -1,6 +1,7 @@
 package async
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/bit-mancer/go-util/util"
@@ -10,23 +11,36 @@ import (
 type Worker struct {
 	_ util.NoCopy // trigger go vet on copy
 
-	tasks     chan interface{}
-	onTask    func(interface{})
-	waitGroup *sync.WaitGroup
-	abandon   chan util.Signal
+	tasks      chan interface{}
+	handleTask func(interface{})
+	waitGroup  *sync.WaitGroup
+	abandon    chan util.Signal
 }
 
-// NewWorker creates, starts, and returns a new Worker.
-// The worker will run until the 'tasks' channel is closed, or Abandon() is called.
-func NewWorker(tasks chan interface{}, onTask func(interface{}), waitGroup *sync.WaitGroup) *Worker {
+// NewWorker creates, starts, and returns a new Worker. The worker will accept items from the 'tasks' channel and run
+// them by calling handleTask(). The worker will run until the 'tasks' channel is closed, or Abandon() is called.
+//
+// NewWorker will return an error if 'tasks' or 'handleTask' are nil.
+// If 'waitGroup' is provided, Add/Done are called as the goroutine starts and stops; waitGroup can be nil if you
+// don't need the start/stop information.
+func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *sync.WaitGroup) (*Worker, error) {
+
+	if tasks == nil {
+		return nil, fmt.Errorf("the tasks channel cannot be nil")
+	}
+
+	if handleTask == nil {
+		return nil, fmt.Errorf("handleTask cannot be nil")
+	}
+
 	w := &Worker{
-		tasks:     tasks,
-		onTask:    onTask,
-		waitGroup: waitGroup,
-		abandon:   make(chan util.Signal)}
+		tasks:      tasks,
+		handleTask: handleTask,
+		waitGroup:  waitGroup,
+		abandon:    make(chan util.Signal)}
 
 	start(w)
-	return w
+	return w, nil
 }
 
 // Design notes: having a signaling channel for quits and using a select, rather than doing a 'for range' on just the
@@ -52,7 +66,7 @@ func start(w *Worker) {
 			select {
 			case task, ok := <-w.tasks:
 				if ok {
-					w.onTask(task)
+					w.handleTask(task)
 				} else {
 					return
 				}

@@ -8,9 +8,9 @@ import (
 // WorkerPool is a pool of goroutine-based Workers.
 type WorkerPool struct {
 	// Worker spec:
-	tasks     chan interface{}
-	onTask    func(interface{})
-	waitGroup *sync.WaitGroup
+	tasks      chan interface{}
+	handleTask func(interface{})
+	waitGroup  *sync.WaitGroup
 
 	// Mutex covers everything below:
 	mutex sync.Mutex // struct will be no-copy due to the mutex
@@ -20,48 +20,53 @@ type WorkerPool struct {
 }
 
 // NewWorkerPool returns a WorkerPool whose workers receive work from the provided tasks channel, and perform the work
-// by calling onTask() on the received work. The pool is initially empty.
+// by calling handleTask() on the received work. The pool is initially empty.
 // THREAD-SAFETY: the WorkerPool is thread-safe.
-func NewWorkerPool(tasks chan interface{}, onTask func(interface{})) *WorkerPool {
+func NewWorkerPool(tasks chan interface{}, handleTask func(interface{})) *WorkerPool {
 	return &WorkerPool{
-		tasks:     tasks,
-		onTask:    onTask,
-		waitGroup: &sync.WaitGroup{},
-		mutex:     sync.Mutex{},
-		workers:   make([]*Worker, 0)}
+		tasks:      tasks,
+		handleTask: handleTask,
+		waitGroup:  &sync.WaitGroup{},
+		mutex:      sync.Mutex{},
+		workers:    make([]*Worker, 0)}
 }
 
 // Add creates, starts, and adds to the pool a number of workers equal to count.
-// Attempting to add to an abandoned pool will result in a panic.
-func (p *WorkerPool) Add(count int) {
+// An error is returned on an attempt to add to an abandoned pool.
+func (p *WorkerPool) Add(count int) error {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
 	if p.isAbandoned {
-		panic("Trying to add workers after pool has been abandoned!")
+		return fmt.Errorf("tried to add %d workers after pool has been abandoned", count)
 	}
 
+	var err error
 	newWorkers := make([]*Worker, count)
 	for i := range newWorkers {
-		newWorkers[i] = NewWorker(p.tasks, p.onTask, p.waitGroup)
+		if newWorkers[i], err = NewWorker(p.tasks, p.handleTask, p.waitGroup); err != nil {
+			return fmt.Errorf("failed to start worker #%d when adding %d workers: %v", i, count, err)
+		}
 	}
 
 	p.workers = append(p.workers, newWorkers...)
+
+	return nil
 }
 
 // Remove abandons and removes from the pool a number of workers equal to count. Abandoned workers will complete any
 // current task they have, and may pick up another task before actually stopping (on average, half the abandoned
 // workers will run another task before stopping).
 // Remove returns an error if count exceeds the size of the pool (no workers will be removed in this case).
-// Attempting to remove from an abandoned pool will result in a panic.
+// An error is returned on an attempt to remove from an abandoned pool.
 func (p *WorkerPool) Remove(count int) error {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
 	if p.isAbandoned {
-		panic("Trying to remove workers after pool has been abandoned!")
+		return fmt.Errorf("tried to remove %d workers after pool has been abandoned", count)
 	}
 
 	length := len(p.workers)
@@ -117,4 +122,11 @@ func (p *WorkerPool) Abandon() {
 func (p *WorkerPool) Wait() {
 	// Don't need the mutex
 	p.waitGroup.Wait()
+}
+
+func (p *WorkerPool) String() string {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	return fmt.Sprintf("&WorkerPool{workers:%d}", len(p.workers))
 }

@@ -1,6 +1,7 @@
 package async_test
 
 import (
+	"fmt"
 	"sync/atomic"
 
 	. "github.com/bit-mancer/go-util/async"
@@ -8,6 +9,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+// WorkerPool should implement Stringer (and there are not necessarily existing static conversions)
+var _ fmt.Stringer = (*WorkerPool)(nil)
 
 var _ = Describe("WorkerPool", func() {
 
@@ -43,7 +47,7 @@ var _ = Describe("WorkerPool", func() {
 
 	Describe("Add", func() {
 		It("Adds workers to the pool", func() {
-			pool.Add(1)
+			Expect(pool.Add(1)).To(BeNil())
 			tasks <- 1
 
 			Eventually(func() uint32 {
@@ -51,16 +55,16 @@ var _ = Describe("WorkerPool", func() {
 			}).Should(Equal(uint32(1)))
 		})
 
-		It("Panics if called on an abandoned pool", func() {
-			pool.Add(1)
+		It("returns an error if called on an abandoned pool", func() {
+			Expect(pool.Add(1)).To(BeNil())
 			pool.Abandon()
-			Expect(func() { pool.Add(1) }).To(Panic())
+			Expect(pool.Add(1)).To(HaveOccurred())
 		})
 	})
 
 	Describe("Remove", func() {
 		It("Removes workers from the pool", func() {
-			pool.Add(1)
+			Expect(pool.Add(1)).To(BeNil())
 			tasks <- 1
 
 			Eventually(func() uint32 {
@@ -72,7 +76,7 @@ var _ = Describe("WorkerPool", func() {
 		})
 
 		It("can be called throughout the lifetime of the pool", func() {
-			pool.Add(3)
+			Expect(pool.Add(3)).To(BeNil())
 			tasks <- 1
 
 			Eventually(func() uint32 {
@@ -81,33 +85,33 @@ var _ = Describe("WorkerPool", func() {
 
 			Expect(pool.Remove(2)).To(BeNil())
 
-			pool.Add(4)
+			Expect(pool.Add(4)).To(BeNil())
 			Expect(pool.Remove(5)).To(BeNil())
 		})
 
 		It("Returns an error if the count exceeds the pool size", func() {
-			pool.Add(2)
+			Expect(pool.Add(2)).To(BeNil())
 			Expect(pool.Remove(3)).NotTo(BeNil())
 		})
 
-		It("Panics if called on an abandoned pool", func() {
-			pool.Add(1)
+		It("returns an error if called on an abandoned pool", func() {
+			Expect(pool.Add(1)).To(BeNil())
 			pool.Abandon()
-			Expect(func() { pool.Remove(1) }).To(Panic())
+			Expect(pool.Remove(1)).To(HaveOccurred())
 		})
 	})
 
 	Describe("Size", func() {
 		It("changes based on Adds and Removes", func() {
 			Expect(pool.Size()).To(Equal(0))
-			pool.Add(3)
+			Expect(pool.Add(3)).To(BeNil())
 			Expect(pool.Size()).To(Equal(3))
-			pool.Remove(2)
+			Expect(pool.Remove(2)).To(BeNil())
 			Expect(pool.Size()).To(Equal(1))
 		})
 
 		It("can be called on an abandoned pool without panicking", func() {
-			pool.Add(1)
+			Expect(pool.Add(1)).To(BeNil())
 			Expect(pool.Size()).To(Equal(1))
 			pool.Abandon()
 			Expect(pool.Size()).To(Equal(1))
@@ -117,7 +121,7 @@ var _ = Describe("WorkerPool", func() {
 	// TODO need more of an integration-level test to properly vet this
 	Describe("Abandon", func() {
 		It("", func(done Done) {
-			pool.Add(1)
+			Expect(pool.Add(1)).To(BeNil())
 			tasks <- 1
 			pool.Abandon()
 			pool.Wait()
@@ -129,7 +133,7 @@ var _ = Describe("WorkerPool", func() {
 	// TODO need more of an integration-level test to properly vet this
 	Describe("Wait", func() {
 		It("blocks until all workers in the pool have terminated", func(done Done) {
-			pool.Add(1)
+			Expect(pool.Add(1)).To(BeNil())
 			tasks <- 1
 			close(tasks)
 			pool.Wait()

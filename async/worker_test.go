@@ -11,23 +11,78 @@ import (
 )
 
 var _ = Describe("Worker", func() {
-	It("is started by StartNewWorker", func() {
 
-		tasks := make(chan interface{}, 1)
-		defer func() { close(tasks) }()
+	Describe("NewWorker", func() {
+		It("requires a task channel and a handler func", func() {
 
-		var callCount uint32 = 0
+			tasks := make(chan interface{}, 1)
+			defer func() { close(tasks) }()
 
-		onTask := func(interface{}) {
-			atomic.AddUint32(&callCount, 1)
-		}
+			var callCount uint32 = 0
 
-		NewWorker(tasks, onTask, nil)
-		tasks <- 1
+			onTask := func(interface{}) {
+				atomic.AddUint32(&callCount, 1)
+			}
 
-		Eventually(func() uint32 {
-			return atomic.LoadUint32(&callCount)
-		}).Should(Equal(uint32(1)))
+			_, err := NewWorker(nil, nil, nil)
+			Expect(err).NotTo(BeNil())
+
+			_, err = NewWorker(tasks, nil, nil)
+			Expect(err).NotTo(BeNil())
+
+			_, err = NewWorker(nil, onTask, nil)
+			Expect(err).NotTo(BeNil())
+
+			_, err = NewWorker(tasks, onTask, nil)
+			Expect(err).To(BeNil())
+			tasks <- 1
+
+			Eventually(func() uint32 {
+				return atomic.LoadUint32(&callCount)
+			}).Should(Equal(uint32(1)))
+		})
+
+		It("can optionally take a WaitGroup", func() {
+
+			tasks := make(chan interface{}, 1)
+			defer func() { close(tasks) }()
+
+			var callCount uint32 = 0
+
+			onTask := func(interface{}) {
+				atomic.AddUint32(&callCount, 1)
+			}
+
+			wg := &sync.WaitGroup{}
+
+			_, err := NewWorker(tasks, onTask, wg)
+			Expect(err).To(BeNil())
+			tasks <- 1
+
+			Eventually(func() uint32 {
+				return atomic.LoadUint32(&callCount)
+			}).Should(Equal(uint32(1)))
+		})
+
+		It("starts and returns a new Worker", func() {
+
+			tasks := make(chan interface{}, 1)
+			defer func() { close(tasks) }()
+
+			var callCount uint32 = 0
+
+			onTask := func(interface{}) {
+				atomic.AddUint32(&callCount, 1)
+			}
+
+			_, err := NewWorker(tasks, onTask, nil)
+			Expect(err).To(BeNil())
+			tasks <- 1
+
+			Eventually(func() uint32 {
+				return atomic.LoadUint32(&callCount)
+			}).Should(Equal(uint32(1)))
+		})
 	})
 
 	// TODO need more of an integration-level test to properly vet this
@@ -42,7 +97,8 @@ var _ = Describe("Worker", func() {
 
 		wg := sync.WaitGroup{}
 
-		NewWorker(tasks, onTask, &wg)
+		_, err := NewWorker(tasks, onTask, &wg)
+		Expect(err).To(BeNil())
 		tasks <- 1
 		<-signal     // wait for worker to pick up the task
 		close(tasks) // close the channel, signaling worker to exit
@@ -62,7 +118,8 @@ var _ = Describe("Worker", func() {
 
 		wg := sync.WaitGroup{}
 
-		worker := NewWorker(tasks, onTask, &wg)
+		worker, err := NewWorker(tasks, onTask, &wg)
+		Expect(err).To(BeNil())
 		worker.Abandon()
 		wg.Wait()
 
