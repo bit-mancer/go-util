@@ -1,3 +1,4 @@
+// Package slices implements slice utilities.
 package slices
 
 // Run 'go generate ./...' to build the various slice utilities
