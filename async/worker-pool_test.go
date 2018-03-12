@@ -10,9 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// WorkerPool should implement Stringer (and there are not necessarily existing static conversions)
-var _ fmt.Stringer = (*WorkerPool)(nil)
-
 var _ = Describe("WorkerPool", func() {
 
 	var callCount *uint32
@@ -140,5 +137,12 @@ var _ = Describe("WorkerPool", func() {
 
 			close(done)
 		})
+	})
+
+	It("is a Stringer", func() {
+		// WorkerPool should implement Stringer (and there are not necessarily existing static conversions)
+		var _ fmt.Stringer = (*WorkerPool)(nil)
+
+		Expect(fmt.Sprintf("%v", pool)).To(ContainSubstring("WorkerPool"))
 	})
 })

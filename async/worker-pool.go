@@ -128,5 +128,5 @@ func (p *WorkerPool) String() string {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return fmt.Sprintf("&WorkerPool{workers:%d}", len(p.workers))
+	return fmt.Sprintf("&WorkerPool{numWorkers:%d}", len(p.workers))
 }
