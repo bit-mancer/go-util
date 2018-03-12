@@ -26,11 +26,11 @@ type Worker struct {
 func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *sync.WaitGroup) (*Worker, error) {
 
 	if tasks == nil {
-		return nil, fmt.Errorf("the tasks channel cannot be nil")
+		return nil, fmt.Errorf("tasks channel cannot be nil")
 	}
 
 	if handleTask == nil {
-		return nil, fmt.Errorf("handleTask cannot be nil")
+		return nil, fmt.Errorf("handleTask func cannot be nil")
 	}
 
 	w := &Worker{

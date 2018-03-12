@@ -6,6 +6,7 @@ import (
 )
 
 // WorkerPool is a pool of goroutine-based Workers.
+// THREAD-SAFETY: the WorkerPool is thread-safe.
 type WorkerPool struct {
 	// Worker spec:
 	tasks      chan interface{}
@@ -21,14 +22,24 @@ type WorkerPool struct {
 
 // NewWorkerPool returns a WorkerPool whose workers receive work from the provided tasks channel, and perform the work
 // by calling handleTask() on the received work. The pool is initially empty.
+// NewWorkerPool will return an error if 'tasks' or 'handleTask' are nil.
 // THREAD-SAFETY: the WorkerPool is thread-safe.
-func NewWorkerPool(tasks chan interface{}, handleTask func(interface{})) *WorkerPool {
+func NewWorkerPool(tasks chan interface{}, handleTask func(interface{})) (*WorkerPool, error) {
+
+	if tasks == nil {
+		return nil, fmt.Errorf("tasks channel cannot be nil")
+	}
+
+	if handleTask == nil {
+		return nil, fmt.Errorf("handleTask func cannot be nil")
+	}
+
 	return &WorkerPool{
 		tasks:      tasks,
 		handleTask: handleTask,
 		waitGroup:  &sync.WaitGroup{},
 		mutex:      sync.Mutex{},
-		workers:    make([]*Worker, 0)}
+		workers:    make([]*Worker, 0)}, nil
 }
 
 // Add creates, starts, and adds to the pool a number of workers equal to count.

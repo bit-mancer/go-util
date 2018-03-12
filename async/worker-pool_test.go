@@ -12,31 +12,51 @@ import (
 
 var _ = Describe("WorkerPool", func() {
 
-	var callCount *uint32
+	var callCount uint32
 	var tasks chan interface{}
 	var onTask func(interface{})
 	var pool *WorkerPool
 
 	BeforeEach(func() {
-		count := uint32(0)
-		callCount = &count
+		callCount = 0
 
 		tasks = make(chan interface{}, 1)
 
 		onTask = func(interface{}) {
-			atomic.AddUint32(callCount, 1)
+			atomic.AddUint32(&callCount, 1)
 		}
 
-		pool = NewWorkerPool(tasks, onTask)
+		var err error
+		pool, err = NewWorkerPool(tasks, onTask)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func(done Done) {
 		pool.Abandon()
 		pool.Wait()
 		close(done)
-	}, 3)
+	}, 3) // timeout
+
+	It("is a Stringer", func() {
+		// WorkerPool should implement Stringer (and there are not necessarily existing static conversions)
+		var _ fmt.Stringer = (*WorkerPool)(nil)
+
+		Expect(fmt.Sprintf("%v", pool)).To(ContainSubstring("WorkerPool"))
+	})
 
 	Describe("NewWorkerPool", func() {
+		It("requires a non-nil tasks channel", func() {
+			newPool, err := NewWorkerPool(nil, onTask)
+			Expect(err).NotTo(BeNil())
+			Expect(newPool).To(BeNil())
+		})
+
+		It("requires a non-nil taskHandler func", func() {
+			newPool, err := NewWorkerPool(tasks, nil)
+			Expect(err).NotTo(BeNil())
+			Expect(newPool).To(BeNil())
+		})
+
 		It("creates a pool of initial size 0", func() {
 			Expect(pool.Size()).To(Equal(0))
 		})
@@ -48,7 +68,7 @@ var _ = Describe("WorkerPool", func() {
 			tasks <- 1
 
 			Eventually(func() uint32 {
-				return atomic.LoadUint32(callCount)
+				return atomic.LoadUint32(&callCount)
 			}).Should(Equal(uint32(1)))
 		})
 
@@ -65,7 +85,7 @@ var _ = Describe("WorkerPool", func() {
 			tasks <- 1
 
 			Eventually(func() uint32 {
-				return atomic.LoadUint32(callCount)
+				return atomic.LoadUint32(&callCount)
 			}).Should(Equal(uint32(1)))
 
 			Expect(pool.Remove(1)).To(BeNil())
@@ -77,7 +97,7 @@ var _ = Describe("WorkerPool", func() {
 			tasks <- 1
 
 			Eventually(func() uint32 {
-				return atomic.LoadUint32(callCount)
+				return atomic.LoadUint32(&callCount)
 			}).Should(Equal(uint32(1)))
 
 			Expect(pool.Remove(2)).To(BeNil())
@@ -124,7 +144,7 @@ var _ = Describe("WorkerPool", func() {
 			pool.Wait()
 
 			close(done)
-		})
+		}, 3) // timeout
 	})
 
 	// TODO need more of an integration-level test to properly vet this
@@ -136,13 +156,6 @@ var _ = Describe("WorkerPool", func() {
 			pool.Wait()
 
 			close(done)
-		})
-	})
-
-	It("is a Stringer", func() {
-		// WorkerPool should implement Stringer (and there are not necessarily existing static conversions)
-		var _ fmt.Stringer = (*WorkerPool)(nil)
-
-		Expect(fmt.Sprintf("%v", pool)).To(ContainSubstring("WorkerPool"))
+		}, 3) // timeout
 	})
 })
