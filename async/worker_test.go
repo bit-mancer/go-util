@@ -86,7 +86,7 @@ var _ = Describe("Worker", func() {
 	})
 
 	// TODO need more of an integration-level test to properly vet this
-	It("can be waited upon to exit", func(done Done) {
+	It("can be waited upon to exit using a WaitGroup provided to NewWorker", func(done Done) {
 
 		signal := make(chan struct{})
 		tasks := make(chan interface{})
@@ -108,21 +108,69 @@ var _ = Describe("Worker", func() {
 		close(done)
 	})
 
-	// TODO need more of an integration-level test to properly vet this
-	It("can be abandoned", func(done Done) {
+	Describe("Abandon", func() {
+		// TODO need more of an integration-level test to properly vet this
+		It("abandons any remaining tasks and causes the Worker to exit", func(done Done) {
 
-		tasks := make(chan interface{})
-		defer close(tasks)
+			tasks := make(chan interface{})
+			defer close(tasks)
 
-		onTask := func(interface{}) {}
+			onTask := func(interface{}) {}
 
-		wg := sync.WaitGroup{}
+			wg := sync.WaitGroup{}
 
-		worker, err := NewWorker(tasks, onTask, &wg)
-		Expect(err).To(BeNil())
-		worker.Abandon()
-		wg.Wait()
+			worker, err := NewWorker(tasks, onTask, &wg)
+			Expect(err).To(BeNil())
+			worker.Abandon()
+			wg.Wait()
 
-		close(done)
+			close(done)
+		})
+	})
+
+	Describe("Wait", func() {
+		// TODO need more of an integration-level test to properly vet this
+		It("blocks until the Worker has exited", func(done Done) {
+
+			signal := make(chan struct{})
+			tasks := make(chan interface{})
+
+			onTask := func(interface{}) {
+				signal <- struct{}{}
+			}
+
+			w, err := NewWorker(tasks, onTask, nil) // no WaitGroup provided
+			Expect(err).To(BeNil())
+			tasks <- 1
+			<-signal     // wait for worker to pick up the task
+			close(tasks) // close the channel, signaling worker to exit
+
+			w.Wait()
+
+			close(done)
+		})
+
+		// TODO need more of an integration-level test to properly vet this
+		It("also works with a WaitGroup provided to NewWorker", func(done Done) {
+
+			signal := make(chan struct{})
+			tasks := make(chan interface{})
+
+			onTask := func(interface{}) {
+				signal <- struct{}{}
+			}
+
+			wg := sync.WaitGroup{}
+
+			_, err := NewWorker(tasks, onTask, &wg)
+			Expect(err).To(BeNil())
+			tasks <- 1
+			<-signal     // wait for worker to pick up the task
+			close(tasks) // close the channel, signaling worker to exit
+
+			wg.Wait()
+
+			close(done)
+		})
 	})
 })

@@ -21,8 +21,8 @@ type Worker struct {
 // them by calling handleTask(). The worker will run until the 'tasks' channel is closed, or Abandon() is called.
 //
 // NewWorker will return an error if 'tasks' or 'handleTask' are nil.
-// If 'waitGroup' is provided, Add/Done are called as the goroutine starts and stops; waitGroup can be nil if you
-// don't need the start/stop information.
+// If 'waitGroup' is provided, Add/Done are called as the goroutine starts and stops. waitGroup can also be nil, in
+// which case an internal WaitGroup will be used (see the Wait method).
 func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *sync.WaitGroup) (*Worker, error) {
 
 	if tasks == nil {
@@ -31,6 +31,10 @@ func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *
 
 	if handleTask == nil {
 		return nil, fmt.Errorf("handleTask func cannot be nil")
+	}
+
+	if waitGroup == nil {
+		waitGroup = &sync.WaitGroup{}
 	}
 
 	w := &Worker{
@@ -51,14 +55,10 @@ func NewWorker(tasks chan interface{}, handleTask func(interface{}), waitGroup *
 // 	  can be interrupted by Abandon().
 func start(w *Worker) {
 
-	if w.waitGroup != nil {
-		w.waitGroup.Add(1)
-	}
+	w.waitGroup.Add(1)
 
 	go func() {
-		if w.waitGroup != nil {
-			defer w.waitGroup.Done()
-		}
+		defer w.waitGroup.Done()
 
 		for {
 			select {
@@ -89,4 +89,12 @@ func (w *Worker) Abandon() {
 	go func() {
 		w.abandon <- Signal{}
 	}()
+}
+
+// Wait is a blocking call that waits for the worker to stop.
+// IMPORTANT: You must have closed the task channel and/or called Abandon() prior to calling Wait, otherwise a
+// deadlock will occur.
+func (w *Worker) Wait() {
+	// Don't need the mutex
+	w.waitGroup.Wait()
 }
