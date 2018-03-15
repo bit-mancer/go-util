@@ -57,9 +57,7 @@ func start(w *Worker) {
 
 	go func() {
 		if w.waitGroup != nil {
-			defer func() {
-				w.waitGroup.Done()
-			}()
+			defer w.waitGroup.Done()
 		}
 
 		for {

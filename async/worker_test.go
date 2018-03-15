@@ -16,7 +16,7 @@ var _ = Describe("Worker", func() {
 		It("requires a task channel and a handler func", func() {
 
 			tasks := make(chan interface{}, 1)
-			defer func() { close(tasks) }()
+			defer close(tasks)
 
 			var callCount uint32 = 0
 
@@ -45,7 +45,7 @@ var _ = Describe("Worker", func() {
 		It("can optionally take a WaitGroup", func() {
 
 			tasks := make(chan interface{}, 1)
-			defer func() { close(tasks) }()
+			defer close(tasks)
 
 			var callCount uint32 = 0
 
@@ -67,7 +67,7 @@ var _ = Describe("Worker", func() {
 		It("starts and returns a new Worker", func() {
 
 			tasks := make(chan interface{}, 1)
-			defer func() { close(tasks) }()
+			defer close(tasks)
 
 			var callCount uint32 = 0
 
@@ -112,7 +112,7 @@ var _ = Describe("Worker", func() {
 	It("can be abandoned", func(done Done) {
 
 		tasks := make(chan interface{})
-		defer func() { close(tasks) }()
+		defer close(tasks)
 
 		onTask := func(interface{}) {}
 
