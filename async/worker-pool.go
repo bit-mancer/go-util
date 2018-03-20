@@ -13,7 +13,7 @@ type WorkerPool struct {
 	handleTask func(interface{})
 	waitGroup  *sync.WaitGroup
 
-	// Mutex covers everything below:
+	// mutex covers everything below:
 	mutex sync.Mutex // struct will be no-copy due to the mutex
 
 	workers     []*Worker
